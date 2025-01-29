@@ -1,7 +1,8 @@
 use {
-    crossbeam::channel::{
+    std::sync::mpsc::{
         Receiver,
         Sender,
+        SyncSender,
     },
     std::{
         thread,
@@ -13,7 +14,7 @@ pub type TickBeamId = usize;
 
 struct TickBeamHandle {
     id: TickBeamId,
-    interrupt_sender: Sender<()>,
+    interrupt_sender: SyncSender<()>,
 }
 
 /// Definition of a beam to be started by a ticker
@@ -52,7 +53,7 @@ impl<P> Default for Ticker<P> {
 
 impl<P> Ticker<P> {
     pub fn new() -> Self {
-        let (tick_sender, tick_receiver) = crossbeam::channel::unbounded();
+        let (tick_sender, tick_receiver) = std::sync::mpsc::channel();
         Self {
             next_id: 0,
             beams: Vec::new(),
@@ -82,7 +83,7 @@ impl<P: Copy + Send + 'static> Ticker<P> {
     pub fn start_beam(&mut self, mission: TickBeam<P>) -> TickBeamId {
         let id = self.next_id;
         self.next_id += 1;
-        let (interrupt_sender, interrupt_receiver) = crossbeam::channel::bounded(1);
+        let (interrupt_sender, interrupt_receiver) = std::sync::mpsc::sync_channel(1);
         let tick_sender = self.tick_sender.clone();
         thread::spawn(move || {
             let mut remaining_count = mission.remaining_count;

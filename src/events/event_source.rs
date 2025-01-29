@@ -20,9 +20,9 @@ use {
         errors::Error,
     },
     crokey::Combiner,
-    crossbeam::channel::{
-        bounded,
-        unbounded,
+    std::sync::mpsc::{
+        channel,
+        sync_channel,
         Receiver,
         Sender,
     },
@@ -147,9 +147,9 @@ impl EventSource {
             false
         };
         combiner.set_mandate_modifier_for_multiple_keys(options.mandate_modifier_for_multiple_keys);
-        let (tx_events, rx_events) = unbounded();
-        let (tx_seqs, rx_seqs) = bounded(ESCAPE_SEQUENCE_CHANNEL_SIZE);
-        let (tx_quit, rx_quit) = unbounded();
+        let (tx_events, rx_events) = channel();
+        let (tx_seqs, rx_seqs) = sync_channel(ESCAPE_SEQUENCE_CHANNEL_SIZE);
+        let (tx_quit, rx_quit) = channel();
         let event_count = Arc::new(AtomicUsize::new(0));
         let internal_event_count = Arc::clone(&event_count);
         thread::spawn(move || {
@@ -289,16 +289,16 @@ impl EventSource {
     }
 
     /// return a new receiver for the channel emmiting events
-    pub fn receiver(&self) -> Receiver<TimedEvent> {
-        self.rx_events.clone()
+    pub fn receiver(&self) -> &Receiver<TimedEvent> {
+        &self.rx_events
     }
 
     /// return a new receiver for the channel emmiting escape sequences
     ///
     /// It's a bounded channel and any escape sequence will be
     /// dropped when it's full
-    pub fn escape_sequence_receiver(&self) -> Receiver<EscapeSequence> {
-        self.rx_seqs.clone()
+    pub fn escape_sequence_receiver(&self) -> &Receiver<EscapeSequence> {
+        &self.rx_seqs
     }
 }
 
