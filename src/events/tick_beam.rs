@@ -44,6 +44,12 @@ impl TickBeamHandle {
     }
 }
 
+impl<P> Default for Ticker<P> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<P> Ticker<P> {
     pub fn new() -> Self {
         let (tick_sender, tick_receiver) = crossbeam::channel::unbounded();

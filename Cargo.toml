@@ -41,3 +41,6 @@ terminal-clipboard = "0.4.1"
 # minimad = { path = "../minimad" }
 # terminal-clipboard = { path = "../terminal-clipboard" }
 # lazy-regex = { path = "../lazy-regex" }
+
+[lints.clippy]
+match_like_matches_macro = "allow"

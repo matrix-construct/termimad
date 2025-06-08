@@ -80,7 +80,7 @@ impl CompoundStyle {
     ///
     /// The `dest` color can be for example a [crossterm] color or a [coolor] one.
     pub fn blend_with<C: Into<coolor::Color>>(&mut self, dest: C, weight: f32) {
-        debug_assert!(weight >= 0.0 && weight <= 1.0);
+        debug_assert!((0.0..=1.0).contains(&weight));
         let dest: coolor::Color = dest.into();
         if let Some(fg) = self.object_style.foreground_color.as_mut() {
             let src: coolor::Color = (*fg).into();
